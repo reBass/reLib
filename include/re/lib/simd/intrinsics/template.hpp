@@ -68,7 +68,7 @@ template <typename T> struct zero {
 template <typename T> struct load {
     lane<T> operator()(T const* p) {
         lane<T> v;
-        copy(p, p + width<T>, begin(v.a));
+        std::copy(p, p + width<T>, begin(v.a));
         return v;
     }
 };
