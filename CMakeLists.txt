@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(reLib)
 
 if(NOT TARGET gsl)
-    add_subdirectory(external/gsl)
+    add_subdirectory(external/gsl EXCLUDE_FROM_ALL)
 endif()
 
 add_library(${PROJECT_NAME} INTERFACE)
