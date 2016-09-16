@@ -7,3 +7,6 @@
 [submodule "tests/external/googletest"]
 	path = tests/external/googletest
 	url = https://github.com/google/googletest
+[submodule "tests/external/rapidcheck"]
+	path = tests/external/rapidcheck
+	url = https://github.com/emil-e/rapidcheck
