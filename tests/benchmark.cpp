@@ -26,7 +26,7 @@
 
 #include <gsl/span>
 
-#include <re/lib/Ring.hpp>
+#include <re/lib/revolver.hpp>
 #include <re/lib/math/reductions.hpp>
 
 #include <benchmark/benchmark.h>
@@ -48,14 +48,14 @@ static void fill_sin(gsl::span<float, N> span) {
 template <int_t N>
 static void fill_sin(gsl::span<double, N> span) {
     for (auto i = 0; i < N; ++i) {
-        span[i] = sin_n(i, N);
+        span[i] = static_cast<double>(sin_n(i, N));
     }
 }
 
 template <int_t N>
 static void fill_sin(gsl::span<long double, N> span) {
     for (auto i = 0; i < N; ++i) {
-        span[i] = sin_n(i, N);
+        span[i] = static_cast<long double>(sin_n(i, N));
     }
 }
 
@@ -122,14 +122,16 @@ static void mean_1024ld(benchmark::State& state) {
 }
 BENCHMARK(mean_1024ld);
 
+/*
 static void stuff() {
-    Ring<std::array<float, 8>> ring;
-    Ring<std::vector<float>> vector_ring({7});
+    revolver<std::array<float, 8>> ring;
+    revolver<std::vector<float>> vector_ring({7});
 
     vector_ring = {1.0f, 2.3f, 56.f};
 
-    //Ring<std::vector<float>> ring_copy = vector_ring;
-    Ring<std::vector<float>> another_copy(vector_ring);
+    //revolver<std::vector<float>> ring_copy = vector_ring;
+    revolver<std::vector<float>> another_copy(vector_ring);
 }
+*/
 
 BENCHMARK_MAIN();
