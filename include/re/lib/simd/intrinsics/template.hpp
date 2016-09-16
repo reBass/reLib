@@ -120,11 +120,9 @@ template <typename T> struct add {
     lane<T> operator()(lane<T> a, lane<T> b) {
         return lane_transform(a, b, a, add<T>());
     }
+
     T operator<<(lane<T> a) {
-        for (auto i = width<T>; i > 1; i >>= 2) {
-            a = hadd<T>()(a, a);
-        }
-        return a.a[0];
+        return lane_accumulate(a, static_cast<T>(0), add<T>());
     }
 };
 template <typename T> struct sub {

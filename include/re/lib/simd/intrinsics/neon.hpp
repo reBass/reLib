@@ -42,6 +42,12 @@ lane<float>
 add<float>::operator() (lane<float> a, lane<float> b) {
     return vaddq_f32(a, b);
 }
+template <>
+lane<float>
+add<float>::operator<< (lane<float> a) {
+    auto p = vpadd_f32(vget_low_f32(a), vget_high_f32(a));
+    return vget_lane_f32(p, 0) + vget_lane_f32(p, 1);
+}
 
 template <>
 lane<float>

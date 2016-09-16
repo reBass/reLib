@@ -26,31 +26,35 @@ template <> struct vector_of<double> { using type = __m128d; };
 
 namespace intrinsics {
 
-template <>
-lane<float>
+template <> lane<float>
 zero<float>::operator()() {
     return _mm_setzero_ps();
 }
 
-template <>
-lane<double>
+template <> lane<double>
 zero<double>::operator()() {
     return _mm_setzero_pd();
 }
 
-template <>
-lane<float>
+template <> lane<float>
 add<float>::operator()(lane<float> a, lane<float> b) {
     return _mm_add_ps(a, b);
 }
-template <>
-lane<double>
+template <> lane<double>
 add<double>::operator()(lane<double> a, lane<double> b) {
     return _mm_add_pd(a, b);
 }
+template <> float
+add<float>::operator<<(lane<float> a) {
+    a = _mm_hadd_ps(a, a);
+    return _mm_hadd_ps(a, a);
+}
+template <> double
+add<double>::operator<<(lane<double> a) {
+    return _mm_hadd_pd(a, a);
+}
 
-template <>
-lane<float>
+template <> lane<float>
 sub<float>::operator()(lane<float> a, lane<float> b) {
     return _mm_sub_ps(a, b);
 }
