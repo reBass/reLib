@@ -22,7 +22,7 @@
 namespace re
 {
 template <typename C>
-class Ring
+class revolver
 {
 public:
     using value_type = typename C::value_type;
@@ -39,54 +39,54 @@ public:
     using reverse_iterator = typename C::reverse_iterator;
     using const_reverse_iterator = typename C::const_reverse_iterator;
 
-    Ring()
+    revolver()
     noexcept(std::is_nothrow_default_constructible<C>::value)
     {
     }
 
-    Ring(Ring const& ring)
+    revolver(revolver const& ring)
     noexcept(std::is_nothrow_copy_constructible<C>::value) :
         c(ring.c)
     {
     }
 
-    Ring(Ring&& ring)
+    revolver(revolver&& ring)
     noexcept(std::is_nothrow_move_constructible<C>::value) :
         c(std::move(ring.c))
     {
     }
 
-    Ring(C const& rhs)
+    revolver(C const& rhs)
     noexcept(std::is_nothrow_copy_constructible<C>::value) :
         c(rhs)
     {
     }
 
-    Ring(C&& rhs)
+    revolver(C&& rhs)
     noexcept(std::is_nothrow_move_constructible<C>::value) :
         c(std::move(rhs))
     {
     }
 
-    Ring& operator=(Ring const& rhs)
+    revolver& operator=(revolver const& rhs)
     noexcept(std::is_nothrow_copy_assignable<C>::value) {
         c = rhs.c;
         return *this;
     }
 
-    Ring& operator=(Ring&& rhs)
+    revolver& operator=(revolver&& rhs)
     noexcept(std::is_nothrow_move_assignable<C>::value) {
         c = std::move(rhs.c);
         return *this;
     }
 
-    Ring& operator=(C const& rhs)
+    revolver& operator=(C const& rhs)
     noexcept(std::is_nothrow_copy_assignable<C>::value) {
         c = rhs;
         return *this;
     }
 
-    Ring& operator=(C&& rhs)
+    revolver& operator=(C&& rhs)
     noexcept(std::is_nothrow_move_assignable<C>::value) {
         c = std::move(rhs);
         return *this;
@@ -95,13 +95,13 @@ public:
     template <
         typename T,
         typename = std::enable_if_t<std::is_assignable<C, T>::value>
-    > Ring& operator=(T&& t)
+    > revolver& operator=(T&& t)
     noexcept(std::is_nothrow_assignable<C, T>::value) {
         c = std::forward<T>(t);
         return *this;
     }
 
-    void swap(Ring& rhs)
+    void swap(revolver& rhs)
     noexcept (c.swap(rhs.c)) {
         c.swap(rhs.c);
     }
