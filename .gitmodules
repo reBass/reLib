@@ -4,3 +4,6 @@
 [submodule "external/gsl/include"]
 	path = external/gsl/include
 	url = https://github.com/Microsoft/GSL
+[submodule "tests/external/googletest"]
+	path = tests/external/googletest
+	url = https://github.com/google/googletest
