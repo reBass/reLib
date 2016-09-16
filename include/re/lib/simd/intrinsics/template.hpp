@@ -87,7 +87,11 @@ namespace intrinsics {
 
 template <typename T> struct zero {
     lane<T> operator()() {
-        return lane<T>();
+        lane<T> v;
+        for (auto& a : v.a) {
+            a = static_cast<T>(0);
+        }
+        return v;
     }
 };
 template <typename T> struct load {
