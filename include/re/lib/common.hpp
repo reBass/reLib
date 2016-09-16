@@ -20,5 +20,5 @@
 namespace re {
 
 using int_t = std::ptrdiff_t;
-
+using uint_t = std::size_t;
 }

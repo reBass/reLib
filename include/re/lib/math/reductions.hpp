@@ -28,7 +28,7 @@ using namespace simd;
 template <typename T, int_t N, typename BinaryOp>
 T reduce(gsl::span<T const, N> in, lane<T> result, BinaryOp op) {
     auto it = std::cbegin(in);
-    for (auto i = 0; i < (std::size(in) % width<T>); ++i) {
+    for (auto i = 0u; i < (std::size(in) % width<T>); ++i) {
         result.a[i] = op(result.a[i], *(it++));
     }
     for (; it < std::cend(in); it += width<T>) {

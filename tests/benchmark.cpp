@@ -29,7 +29,10 @@
 #include <re/lib/revolver.hpp>
 #include <re/lib/math/reductions.hpp>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
 #include <benchmark/benchmark.h>
+#pragma clang diagnostic pop
 
 using namespace re;
 using namespace re::math;
