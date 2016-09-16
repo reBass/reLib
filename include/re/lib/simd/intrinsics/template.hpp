@@ -47,7 +47,13 @@ union lane {
 
 template <typename T, typename BinaryOp>
 lane<T>& lane_transform(lane<T> const& a, lane<T> const& b, lane<T>& output, BinaryOp op) {
-    std::transform(cbegin(a.a), cend(a.a), cbegin(a.a), begin(output.a), op);
+    std::transform(
+        std::cbegin(a.a),
+        std::cend(a.a),
+        std::cbegin(b.a),
+        std::begin(output.a),
+        op
+    );
     return output;
 };
 
