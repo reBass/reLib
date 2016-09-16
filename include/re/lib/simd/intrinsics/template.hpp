@@ -17,6 +17,10 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
+#include <numeric>
+#include <functional>
+
 #include <re/lib/common.hpp>
 
 namespace re {
@@ -59,8 +63,23 @@ lane<T>& lane_transform(lane<T> const& a, lane<T> const& b, lane<T>& output, Bin
 
 template <typename T, typename UnaryOp>
 lane<T>& lane_transform(lane<T> const& a, lane<T>& output, UnaryOp op) {
-    std::transform(cbegin(a.a), cend(a.a), begin(output.a), op);
+    std::transform(
+        std::cbegin(a.a),
+        std::cend(a.a),
+        std::begin(output.a),
+        op
+    );
     return output;
+};
+
+template <typename T, typename BinaryOp>
+T lane_accumulate(lane<T> const& a, T initial, BinaryOp op) {
+    return std::accumulate(
+        std::cbegin(a.a),
+        std::cend(a.a),
+        initial,
+        op
+    );
 };
 
 
@@ -93,6 +112,7 @@ template <typename T> struct hadd {
 };
 template <typename T> struct add {
     constexpr T operator()(T a, T b) { return a + b; }
+
     lane<T> operator()(lane<T> a, lane<T> b) {
         return lane_transform(a, b, a, add<T>());
     }
@@ -127,63 +147,13 @@ template <typename T> struct sqrt {
         return lane_transform(a, a, sqrt<T>());
     }
 };
+template <typename T> struct reduce_add {
+    lane<T> operator()(lane<T> a) {
+        return lane_accumulate(a, static_cast<T>(0), std::plus<T>());
+    }
+};
 
 }
 
-/*
-template <typename T>
-struct intrinsics {
-    static constexpr auto load = [](T const* data) { return *data; };
-    static constexpr auto add = [](T a, T b) { return a + b; };
-    static constexpr auto subtract = [](T a, T b) { return a - b; };
-    static constexpr auto multiply = [](T a, T b) { return a * b; };
-    static constexpr auto square = [](T a) { return multiply(a, a); };
-    static constexpr auto square_root = [](T a) { return std::sqrt(a); };
-};
-
-template <typename T>
-intrinsics<lane<T>>::load = [](T const* data) {
-    lane<T> v;
-    copy(data, data + width<T>, begin(v.a));
-    return v;
-};
-
-template <typename T>
-intrinsics<lane<T>>::add = [](lane<T> a, lane<T> b) {
-    return lane_transform(a, b, a, intrinsics<T>::add);
-};
-/*
-template <typename T>
-struct intrinsics<lane<T>> {
-    static constexpr auto subtract = [](lane<T> a, lane<T> b) {
-        return lane_transform(a, b, a, intrinsics<T>::subtract);
-    };
-    static constexpr auto multiply = [](lane<T> a, lane<T> b) {
-        return lane_transform(a, b, a, intrinsics<T>::multiply);
-    };
-
-    /*
-    static lane<T> square(lane<T> v) {
-        return multiply(v, v);
-    }
-    static lane<T> square_root(lane<T> v) {
-        transform(cbegin(v.a), cend(v.a), begin(v.a), [](auto x) { return sqrt(x); });
-        return v;
-    }
-
-    static constexpr auto add_horizontally = [](lane<T> a, lane<T> b) {
-        auto const half = width<T>;
-        for (auto i = 0; i < half; ++i) {
-            a.a[i] = a.a[2*i] + a.a[2*i + 1];
-        }
-        for (auto i = 0; i < half; ++i) {
-            a.a[i + half] = b.a[2*i] + b.a[2*i + 1];
-        }
-        return a;
-    };
-
-    static constexpr auto zero = []() { return lane<T>(); };
-};
-*/
 }
 }
