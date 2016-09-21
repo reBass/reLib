@@ -40,13 +40,20 @@ is_inverse(direction d) {
 
 template <typename T>
 std::complex<T>
-inline multiply_fast(std::complex<T> a, std::complex<T> b)
-noexcept
+inline multiply_fast(std::complex<T> a, std::complex<T> b) noexcept
 {
     return {
         a.real() * b.real() - a.imag() * b.imag(),
         a.real() * b.imag() + a.imag() * b.real()
     };
+}
+
+template <typename T, bool IsInverse>
+constexpr std::complex<T> flip(std::complex<T> value) noexcept
+{
+    return IsInverse
+           ? std::complex<T>{ -value.imag(), value.real() }
+           : std::complex<T>{ value.imag(), -value.real() };
 }
 
 
