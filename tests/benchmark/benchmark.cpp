@@ -28,7 +28,7 @@
 
 #include <re/lib/container/revolver.hpp>
 #include <re/lib/math/reductions.hpp>
-#include <re/lib/math/fft/simd_fft.hpp>
+#include <re/lib/fft/simd_fft.hpp>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wpadded"

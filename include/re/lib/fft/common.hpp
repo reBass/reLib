@@ -20,7 +20,6 @@
 #include <utility>
 
 namespace re {
-namespace math {
 namespace fft {
 
 enum class direction: bool {
@@ -51,6 +50,5 @@ noexcept
 }
 
 
-}
 }
 }

@@ -25,10 +25,9 @@
 #include <complex>
 #include <gsl/span>
 
-#include "real_fft.hpp"
+#include <re/lib/fft/real_fft.hpp>
 
 namespace re {
-namespace math {
 namespace fft {
 
 template <typename T, int N>
@@ -89,5 +88,4 @@ private:
 };
 
 } // fft
-} // math
 } // re

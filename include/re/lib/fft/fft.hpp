@@ -26,11 +26,10 @@
 #include <gsl/span>
 
 #include <re/lib/common.hpp>
-#include <re/lib/math/fft/common.hpp>
 #include <re/lib/container/subspan.hpp>
+#include <re/lib/fft/common.hpp>
 
 namespace re {
-namespace math {
 namespace fft {
 
 template <typename T, int_t N, direction Direction>
@@ -271,5 +270,4 @@ private:
 };
 
 } // fft
-} // math
 } // re

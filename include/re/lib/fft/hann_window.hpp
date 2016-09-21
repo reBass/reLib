@@ -28,10 +28,9 @@
 #include <functional>
 #include <gsl/span>
 
-#include "common.hpp"
+#include <re/lib/common.hpp>
 
 namespace re {
-namespace math {
 namespace fft {
 
 template <typename T, int_t N>
@@ -89,16 +88,15 @@ private:
     }
 
     static constexpr T
-    window_function(std::ptrdiff_t position)
+    window_function(int_t position)
     noexcept
     {
         auto relative_position = static_cast<T>(position) / N;
-        return (1 - std::cos(relative_position * 2 * pi < T > )) / 2;
+        return (1 - std::cos(relative_position * 2 * pi<T>)) / 2;
     }
 
     std::array<T, N> cache;
 };
 
 } // fft
-} // math
 } // re
