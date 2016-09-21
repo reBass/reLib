@@ -26,8 +26,9 @@
 
 #include <gsl/span>
 
-#include <re/lib/revolver.hpp>
+#include <re/lib/container/revolver.hpp>
 #include <re/lib/math/reductions.hpp>
+#include <re/lib/math/fft/simd_fft.hpp>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wpadded"
@@ -62,6 +63,19 @@ static void fill_sin(gsl::span<long double, N> span) {
     }
 }
 
+static void atria_mean_1024f(benchmark::State& state) {
+    std::array<float, 1024> input;
+    fill_sin(gsl::span<float, 1024>(input));
+    while (state.KeepRunning()) {
+        input[0] = simd::reduce_scalar(
+            simd::intrinsics::add<float>(),
+            simd::intrinsics::add<float>(),
+            0.f,
+            gsl::span<float, 1024>(input)
+        ) / 1024;
+    }
+}
+BENCHMARK(atria_mean_1024f);
 
 static void std_mean_1024f(benchmark::State& state) {
     std::array<float, 1024> input;
@@ -115,6 +129,23 @@ static void mean_1024d(benchmark::State& state) {
     }
 }
 BENCHMARK(mean_1024d);
+
+static void BM_FFT_float_512cpx_bi_direct(benchmark::State& state) {
+    std::array<std::complex<float>, 256> __attribute__((aligned (16))) input;
+    input.fill(0);
+    input[1] = 1;
+
+    std::array<std::complex<float>, 256> __attribute__((aligned (16))) output;
+    fft::simd_fft<float, 256> fft;
+
+    while (state.KeepRunning()) {
+        fft(input, output);
+        input[1] = output[1];
+    }
+}
+BENCHMARK(BM_FFT_float_512cpx_bi_direct);
+
+
 
 static void mean_1024ld(benchmark::State& state) {
     std::array<long double, 1024> input;

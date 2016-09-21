@@ -15,20 +15,42 @@
 
 #pragma once
 
-#include <cstddef>
 #include <complex>
+#include <tuple>
+#include <utility>
 
 namespace re {
+namespace math {
+namespace fft {
 
-using int_t = std::ptrdiff_t;
-using uint_t = std::size_t;
-
-template <typename T> constexpr T pi = T(3.141592653589793238462643L);
+enum class direction: bool {
+    forward = false,
+    inverse = true
+};
 
 template <typename T>
-T abs_difference (const T a, const T b)
-noexcept {
-    return (a > b) ? (a - b) : (b - a);
+constexpr void
+scissors(std::complex<T>& a, std::complex<T>& b) {
+    std::tie(a, b) = std::make_pair(a + b, a - b);
 }
 
+constexpr bool
+is_inverse(direction d) {
+    return d == direction::inverse;
+}
+
+template <typename T>
+std::complex<T>
+inline multiply_fast(std::complex<T> a, std::complex<T> b)
+noexcept
+{
+    return {
+        a.real() * b.real() - a.imag() * b.imag(),
+        a.real() * b.imag() + a.imag() * b.real()
+    };
+}
+
+
+}
+}
 }

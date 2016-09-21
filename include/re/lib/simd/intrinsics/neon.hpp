@@ -27,14 +27,14 @@ namespace intrinsics {
 
 template <>
 lane<float>
-load<float>::operator() (float const* data) {
-    return vld1q_f32(data);
+zero<float>() {
+    return vcombine_f32(vcreate_f32(0), vcreate_f32(0));
 }
 
 template <>
 lane<float>
-zero<float>::operator() () {
-    return vcombine_f32(vcreate_f32(0), vcreate_f32(0));
+load<float>::operator() (float const* data) {
+    return vld1q_f32(data);
 }
 
 template <>

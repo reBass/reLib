@@ -16,10 +16,13 @@ target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-c++98-compat")
 target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-c++98-compat-pedantic")
 target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-missing-prototypes")
 target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-unknown-pragmas")
+target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-sign-conversion")
 target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-unused-parameter")
 target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-weak-vtables")
 target_compile_options(${PROJECT_NAME} INTERFACE "-march=native")
 
 
+
+enable_testing()
 add_subdirectory(tests)
 

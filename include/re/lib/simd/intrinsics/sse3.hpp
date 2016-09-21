@@ -108,6 +108,12 @@ hadd<double>::operator()(lane<double> a, lane<double> b) {
     return _mm_hadd_pd(a, b);
 }
 
+template <>
+bool
+any_greater_than<float>::operator()(lane<float> a, lane<float> b) {
+    return _mm_movemask_ps(_mm_cmpgt_ps(a, b)) > 0;
+}
+
 }
 
 }

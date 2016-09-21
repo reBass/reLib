@@ -15,20 +15,12 @@
 
 #pragma once
 
-#include <cstddef>
 #include <complex>
 
 namespace re {
+namespace math {
 
-using int_t = std::ptrdiff_t;
-using uint_t = std::size_t;
 
-template <typename T> constexpr T pi = T(3.141592653589793238462643L);
 
-template <typename T>
-T abs_difference (const T a, const T b)
-noexcept {
-    return (a > b) ? (a - b) : (b - a);
-}
-
-}
+} // math
+} // re

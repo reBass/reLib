@@ -28,13 +28,13 @@ namespace intrinsics {
 
 template <>
 lane<float>
-zero<float>::operator()() {
+zero<float>() {
     return _mm512_setzero_ps();
 }
 
 template <>
 lane<double>
-zero<double>::operator()() {
+zero<double>() {
     return _mm512_setzero_pd();
 }
 

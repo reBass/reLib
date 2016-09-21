@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bitset>
 #include <cmath>
 #include <numeric>
 #include <functional>
@@ -30,27 +31,29 @@ template <typename T> struct vector_of { using type = T; };
 template <typename T> using vec_t = typename vector_of<T>::type;
 template <typename T> constexpr int width = sizeof(vec_t<T>) / sizeof(T);
 
+template <typename T> struct lane_ptr {
+    T* ptr;
+    explicit lane_ptr(T* p) : ptr{p} {}
+    operator T*() { return ptr; }
+};
+
 template <typename T>
 union lane {
     std::array<T, width<T>> a;
     vec_t<T> v;
 
-    lane()
-    {
-    }
-
-    lane(vec_t<T> rhs) :
-        v(rhs)
-    {
-    }
-
-    operator vec_t<T>&() {
-        return v;
-    }
+    lane() { }
+    lane(vec_t<T> rhs) : v(rhs) { }
+    operator vec_t<T>&() { return v; }
 };
 
 template <typename T, typename BinaryOp>
-lane<T>& lane_transform(lane<T> const& a, lane<T> const& b, lane<T>& output, BinaryOp op) {
+lane<T>& lane_transform(
+    lane<T> const& a,
+    lane<T> const& b,
+    lane<T>& output,
+    BinaryOp op
+) {
     std::transform(
         std::cbegin(a.a),
         std::cend(a.a),
@@ -85,19 +88,45 @@ T lane_accumulate(lane<T> const& a, T initial, BinaryOp op) {
 
 namespace intrinsics {
 
-template <typename T> struct zero {
-    lane<T> operator()() {
-        lane<T> v;
+template <typename T> lane<T> zero() {
+    lane<T> v;
+    for (auto& a : v.a) {
+        a = static_cast<T>(0);
+    }
+    return v;
+}
+
+template <typename T> struct set {
+    lane<T> operator()(T value) {
+        lane <T> v;
         for (auto& a : v.a) {
-            a = static_cast<T>(0);
+            a = value;
         }
         return v;
     }
 };
 template <typename T> struct load {
-    lane<T> operator()(T const* p) {
+    T operator()(T const* p) {
+        return *p;
+    }
+    lane<T> operator()(lane_ptr<T const> p) {
         lane<T> v;
-        std::copy(p, p + width<T>, begin(v.a));
+        std::copy(p.ptr, p.ptr + width<T>, begin(v.a));
+        return v;
+    }
+};
+template <typename T> struct store {
+    void operator()(T* p, T value) {
+        *p = value;
+    }
+    void operator()(lane_ptr<T> p, lane<T> value) {
+        std::copy(std::begin(value.a), std::end(value.a), p.ptr);
+    }
+};
+template <typename T> struct fill {
+    lane<T> operator()(T value) {
+        lane<T> v;
+        v.a.fill(value);
         return v;
     }
 };
@@ -120,7 +149,9 @@ template <typename T> struct add {
     lane<T> operator()(lane<T> a, lane<T> b) {
         return lane_transform(a, b, a, add<T>());
     }
-
+    T operator()(lane<T> a) {
+        return lane_accumulate(a, static_cast<T>(0), add<T>());
+    }
     T operator<<(lane<T> a) {
         return lane_accumulate(a, static_cast<T>(0), add<T>());
     }
@@ -150,12 +181,70 @@ template <typename T> struct sqrt {
     }
 };
 template <typename T> struct reduce_add {
-    lane<T> operator()(lane<T> a) {
+    T operator()(lane<T> a) {
         return lane_accumulate(a, static_cast<T>(0), std::plus<T>());
     }
 };
 
+template <typename T> struct max {
+    T operator()(T a, T b) {
+        return std::fmax(a, b);
+    }
+    lane<T> operator()(lane<T> a, lane<T> b) {
+        return lane_transform(a, b, a, *this);
+    }
+};
+
+template <typename T> struct any_greater_than {
+    bool operator()(T a, T b) {
+        return a > b;
+    }
+    bool operator()(lane<T> a, lane<T> b) {
+        return lane_accumulate(
+            sub<T>()(a, b),
+            false,
+            [](bool r, T d) {
+                return r || d > 0;
+            }
+        );
+    }
+};
+
 }
+
+
+template <typename T>
+inline lane<T> load(T const* p) {
+    return intrinsics::load<T>()(lane_ptr<T const>(p));
+}
+
+template <typename T>
+inline void store(T* p, lane<T> value) {
+    intrinsics::store<T>()(lane_ptr<T>(p), value);
+}
+
+
+template <typename T>
+inline lane<T> add(lane<T> a, lane<T> b) {
+    return intrinsics::add<T>()(a, b);
+}
+
+template <typename T>
+inline lane<T> subtract(lane<T> a, lane<T> b) {
+    return intrinsics::sub<T>()(a, b);
+}
+
+template <typename T>
+inline lane<T> multiply(lane<T> a, lane<T> b) {
+    return intrinsics::mul<T>()(a, b);
+}
+
+template <typename T>
+inline lane<T> set_lane(T value) {
+    return intrinsics::set<T>()(value);
+}
+
+
 
 }
 }

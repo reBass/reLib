@@ -15,20 +15,28 @@
 
 #pragma once
 
-#include <cstddef>
-#include <complex>
+#include <cassert>
+#include <numeric>
+#include <gsl/span>
+
+#include <re/lib/common.hpp>
 
 namespace re {
+namespace math {
 
-using int_t = std::ptrdiff_t;
-using uint_t = std::size_t;
 
-template <typename T> constexpr T pi = T(3.141592653589793238462643L);
-
-template <typename T>
-T abs_difference (const T a, const T b)
-noexcept {
-    return (a > b) ? (a - b) : (b - a);
+template <typename T, int_t N>
+T
+mean(gsl::span<T const, N> input)
+noexcept
+{
+    assert(std::size(input) > 0);
+    return std::accumulate(
+        std::cbegin(input),
+        std::cend(input),
+        static_cast<T>(0)
+    ) / std::size(input);
 }
 
+}
 }

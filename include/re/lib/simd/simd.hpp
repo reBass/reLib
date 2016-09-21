@@ -15,6 +15,10 @@
 
 #pragma once
 
+#include <tuple>
+#include <type_traits>
+#include <utility>
+
 // order matters
 #include <re/lib/simd/identification.hpp>
 #include <re/lib/simd/intrinsics/template.hpp>
@@ -47,6 +51,48 @@ struct apply
         return BinaryOp() << a;
     }
 };
+
+
+
+template <
+        std::size_t ...I,
+        typename StepFnT,
+        typename ToScalarFnT,
+        typename ScalarT,
+        typename...SpanTs>
+inline ScalarT
+reduce_impl(
+        std::index_sequence<I...>,
+        StepFnT step,
+        ToScalarFnT to_scalar,
+        ScalarT initial,
+        SpanTs ...spans)
+{
+    auto firsts = std::make_tuple(std::begin(spans)...);
+    auto const lasts  = std::make_tuple(std::end(spans)...);
+    auto state = set_lane(initial);
+
+    while (std::get<0>(firsts) != std::get<0>(lasts)) {
+        state = step(state, load(&(*std::get<I>(firsts)))...);
+        std::get<I...>(firsts) += width<ScalarT>;
+    }
+
+    return to_scalar(state);
+}
+
+template <typename StepFnT, typename ToScalarFnT, typename ScalarT, typename ...SpanTs>
+ScalarT reduce_scalar(StepFnT step, ToScalarFnT to_scalar, ScalarT initial, SpanTs ...spans)
+{
+    return reduce_impl(
+        std::index_sequence_for<SpanTs...>{},
+        to_scalar,
+        step,
+        initial,
+        spans...
+    );
+};
+
+
 
 }
 }
