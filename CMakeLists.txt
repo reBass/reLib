@@ -19,6 +19,10 @@ target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-unknown-pragmas")
 target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-sign-conversion")
 target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-unused-parameter")
 target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-weak-vtables")
+target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-shadow")
+target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-global-constructors")
+target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-double-promotion")
+target_compile_options(${PROJECT_NAME} INTERFACE "-Wno-padded")
 target_compile_options(${PROJECT_NAME} INTERFACE "-march=native")
 
 

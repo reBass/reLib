@@ -44,8 +44,7 @@ is_inverse(direction d) {
 
 template <typename T>
 std::complex<T>
-inline multiply_fast(std::complex<T> a, std::complex<T> b)
-noexcept
+inline multiply_fast(std::complex<T> a, std::complex<T> b) noexcept
 {
     return {
         a.real() * b.real() - a.imag() * b.imag(),

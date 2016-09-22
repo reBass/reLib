@@ -262,7 +262,7 @@ namespace re {
             return (index < Size) ? index : (index - Size);
         }
 
-        container_type c;
         container_iterator next;
+        container_type c;
     };
 }

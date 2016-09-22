@@ -41,12 +41,12 @@ public:
 
     constexpr indexed_iterator(
         container_t* c,
-        difference_type index
+        difference_type i
     ) :
         container(c),
-        index(index)
+        index(i)
     {
-        assert(index >= 0);
+        assert(i >= 0);
     }
 
     friend class indexed_iterator<Container, true>;

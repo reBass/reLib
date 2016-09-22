@@ -64,14 +64,14 @@ struct element
             last
         );
         return element<T>(first, m);
-    };
+    }
 };
 
 template <
     typename InputIt1,
     typename InputIt2,
     typename BinaryOp,
-    typename ElementType = typename BinaryOp::result_type
+    typename ElementT = typename BinaryOp::result_type
 >
 auto max_result(
     InputIt1 first1,
@@ -81,11 +81,11 @@ auto max_result(
 ) noexcept
 {
     if (first1 == last1) {
-        return Element<ElementType>(static_cast<ElementType>(0), size_t{0});
+        return element<ElementT>(static_cast<ElementT>(0), std::size_t{0});
     }
 
     if (std::distance(first1, last1) == 0) {
-        return Element<ElementType>(op(*first1, *first2), std::size_t{0});
+        return element<ElementT>(op(*first1, *first2), std::size_t{0});
     }
 
     auto it1 = first1;
@@ -101,7 +101,7 @@ auto max_result(
         }
     }
 
-    return Element<ElementType>(
+    return element<ElementT>(
         largest_value,
         std::distance(first1, largest1)
     );
