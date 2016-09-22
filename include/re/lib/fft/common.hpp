@@ -34,6 +34,10 @@ scissors(std::complex<T>& a, std::complex<T>& b) {
 }
 
 constexpr bool
+is_forward(direction d) {
+    return d == direction::forward;
+}
+constexpr bool
 is_inverse(direction d) {
     return d == direction::inverse;
 }
@@ -49,6 +53,14 @@ noexcept
     };
 }
 
+
+template <direction Direction, typename T>
+constexpr std::complex<T> flip(std::complex<T> value)
+noexcept {
+    return Direction == direction::forward
+           ? std::complex<T>{  value.imag(), -value.real() }
+           : std::complex<T>{ -value.imag(),  value.real() };
+}
 
 }
 }

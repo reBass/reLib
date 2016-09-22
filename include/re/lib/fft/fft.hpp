@@ -23,7 +23,6 @@
 #include <cassert>
 #include <complex>
 #include <type_traits>
-#include <gsl/span>
 
 #include <re/lib/common.hpp>
 #include <re/lib/container/subspan.hpp>
@@ -35,11 +34,30 @@ namespace fft {
 template <typename T, int_t N, direction Direction>
 class fft
 {
-    using real_t = T;
-    using cpx_t = std::complex<T>;
-
+public:
     static_assert(std::is_floating_point<T>::value);
     static_assert((N & (N - 1)) == 0, "N must be a power of 2.");
+
+    fft() noexcept
+    {
+        auto const step = (is_inverse(Direction) ? 2 : -2) * pi < real_t > / N;
+        for (auto i = 0u; i < std::size(twiddles); ++i) {
+            twiddles[i] = std::polar(real_t{1}, i * step);
+        }
+    }
+
+    void
+    operator()(
+        gsl::span<std::complex<T> const, N> in,
+        gsl::span<std::complex<T>, N> out
+    ) const noexcept
+    {
+        step_in(in, out);
+    }
+
+private:
+    using real_t = T;
+    using cpx_t = std::complex<T>;
 
     static constexpr int_t stride(int_t n_out)
     {
@@ -56,25 +74,6 @@ class fft
         return n_out / radix(n_out);
     }
 
-public:
-    fft()
-    noexcept
-    {
-        auto const step = (is_inverse(Direction) ? 2 : -2) * pi < real_t > / N;
-        for (auto i = 0u; i < std::size(twiddles); ++i) {
-            twiddles[i] = std::polar(real_t{1}, i * step);
-        }
-    }
-
-    void
-    operator()(gsl::span<cpx_t const, N> in, gsl::span <cpx_t, N> out)
-    const noexcept
-    {
-        step_in(in, out);
-    }
-
-private:
-
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "InfiniteRecursion"
 
@@ -83,23 +82,23 @@ private:
     step_in(gsl::span<cpx_t const, N_in> in, gsl::span <cpx_t, N_out> out)
     const noexcept
     {
-        auto const m_out = remainder(N_out);
-        auto const s = stride(N_out);
-        auto const m_in = N_in - s;
+        constexpr auto m_out = remainder(N_out);
+        constexpr auto s = stride(N_out);
+        constexpr auto m_in = N_in - s;
 
-        step_in(subspan<0 * s, m_in>(in), subspan<0 * m_out, m_out>(out));
-        step_in(subspan<1 * s, m_in>(in), subspan<1 * m_out, m_out>(out));
+        step_in(subspan<0*s, m_in>(in), subspan<0*m_out, m_out>(out));
+        step_in(subspan<1*s, m_in>(in), subspan<1*m_out, m_out>(out));
 
         if (radix(N_out) > 2) {
-            step_in(subspan<2 * s, m_in>(in), subspan<2 * m_out, m_out>(out));
-            step_in(subspan<3 * s, m_in>(in), subspan<3 * m_out, m_out>(out));
+            step_in(subspan<2*s, m_in>(in), subspan<2*m_out, m_out>(out));
+            step_in(subspan<3*s, m_in>(in), subspan<3*m_out, m_out>(out));
         }
 
         if (radix(N_out) > 4) {
-            step_in(subspan<4 * s, m_in>(in), subspan<4 * m_out, m_out>(out));
-            step_in(subspan<5 * s, m_in>(in), subspan<5 * m_out, m_out>(out));
-            step_in(subspan<6 * s, m_in>(in), subspan<6 * m_out, m_out>(out));
-            step_in(subspan<7 * s, m_in>(in), subspan<7 * m_out, m_out>(out));
+            step_in(subspan<4*s, m_in>(in), subspan<4*m_out, m_out>(out));
+            step_in(subspan<5*s, m_in>(in), subspan<5*m_out, m_out>(out));
+            step_in(subspan<6*s, m_in>(in), subspan<6*m_out, m_out>(out));
+            step_in(subspan<7*s, m_in>(in), subspan<7*m_out, m_out>(out));
         }
 
         butterfly(out);
@@ -146,9 +145,14 @@ private:
 
     template <int_t N_out>
     inline void
-    butterfly(gsl::span <cpx_t, N_out> output)
-    const noexcept
+    butterfly(gsl::span <cpx_t, N_out> output) const noexcept
     {
+        static_assert(
+            radix(N_out) == 2
+            || radix(N_out) == 4
+            || radix(N_out) == 8
+        );
+
         switch (radix(N_out)) {
             case 8:
                 butterfly_radix8(output);
@@ -160,18 +164,16 @@ private:
                 butterfly_radix2(output);
                 break;
             default:
-                assert(false);
                 break;
         }
     }
 
     template <int_t N_out>
     inline void
-    butterfly_radix2(gsl::span <cpx_t, N_out> out)
-    const noexcept
+    butterfly_radix2(gsl::span <cpx_t, N_out> out) const noexcept
     {
-        auto const m = remainder(N_out);
-        auto const s = stride(N_out);
+        constexpr auto m = remainder(N_out);
+        constexpr auto s = stride(N_out);
 
         scissors(out[0], out[m]);
         for (auto i = 1; i < m; ++i) {
@@ -182,91 +184,69 @@ private:
 
     template <int_t N_out>
     inline void
-    butterfly_radix4(gsl::span <cpx_t, N_out> out)
-    const noexcept
+    butterfly_radix4(gsl::span <cpx_t, N_out> out) const noexcept
     {
-        auto const m = remainder(N_out);
-        auto const s = stride(N_out);
+        constexpr auto m = remainder(N_out);
+        constexpr auto s = stride(N_out);
 
         for (auto i = 0; i < m; ++i) {
             if (i > 0) {
-                out[i + 1 * m] = multiply_fast(
-                    out[i + 1 * m], twiddles[2 * i * s]
-                );
-                out[i + 2 * m] = multiply_fast(
-                    out[i + 2 * m], twiddles[1 * i * s]
-                );
-                out[i + 3 * m] = multiply_fast(
-                    out[i + 3 * m], twiddles[3 * i * s]
-                );
+                out[i + 1*m] = multiply_fast(out[i + 1*m], twiddles[2*i*s]);
+                out[i + 2*m] = multiply_fast(out[i + 2*m], twiddles[1*i*s]);
+                out[i + 3*m] = multiply_fast(out[i + 3*m], twiddles[3*i*s]);
             }
-            scissors(out[i + 0 * m], out[i + 1 * m]);
-            scissors(out[i + 2 * m], out[i + 3 * m]);
-            scissors(out[i + 0 * m], out[i + 2 * m]);
-            out[i + 3 * m] = flip<is_inverse(Direction)>(out[i + 3 * m]);
-            scissors(out[i + 1 * m], out[i + 3 * m]);
+            scissors(out[i + 0*m], out[i + 1*m]);
+            scissors(out[i + 2*m], out[i + 3*m]);
+            scissors(out[i + 0*m], out[i + 2*m]);
+            out[i + 3*m] = flip<Direction>(out[i + 3*m]);
+            scissors(out[i + 1*m], out[i + 3*m]);
         }
     }
 
     template <int_t N_out>
     inline void
-    butterfly_radix8(gsl::span <cpx_t, N_out> out)
-    const noexcept
+    butterfly_radix8(gsl::span <cpx_t, N_out> out) const noexcept
     {
-        auto const m = remainder(N_out);
-        auto const s = stride(N_out);
+        constexpr auto m = remainder(N_out);
+        constexpr auto s = stride(N_out);
 
         for (auto i = 1; i < m; ++i) {
             if (i > 0) {
-                out[i + 1 * m] = multiply_fast(
-                    out[i + 1 * m], twiddles[4 * i * s]
-                );
-                out[i + 2 * m] = multiply_fast(
-                    out[i + 2 * m], twiddles[2 * i * s]
-                );
-                out[i + 3 * m] = multiply_fast(
-                    out[i + 3 * m], twiddles[6 * i * s]
-                );
-                out[i + 4 * m] = multiply_fast(
-                    out[i + 4 * m], twiddles[1 * i * s]
-                );
-                out[i + 5 * m] = multiply_fast(
-                    out[i + 5 * m], twiddles[5 * i * s]
-                );
-                out[i + 6 * m] = multiply_fast(
-                    out[i + 6 * m], twiddles[3 * i * s]
-                );
-                out[i + 7 * m] = multiply_fast(
-                    out[i + 7 * m], twiddles[7 * i * s]
-                );
+                out[i + 1*m] = multiply_fast(out[i + 1*m], twiddles[4*i*s]);
+                out[i + 2*m] = multiply_fast(out[i + 2*m], twiddles[2*i*s]);
+                out[i + 3*m] = multiply_fast(out[i + 3*m], twiddles[6*i*s]);
+                out[i + 4*m] = multiply_fast(out[i + 4*m], twiddles[1*i*s]);
+                out[i + 5*m] = multiply_fast(out[i + 5*m], twiddles[5*i*s]);
+                out[i + 6*m] = multiply_fast(out[i + 6*m], twiddles[3*i*s]);
+                out[i + 7*m] = multiply_fast(out[i + 7*m], twiddles[7*i*s]);
             }
 
-            scissors(out[i + 0 * m], out[i + 1 * m]);
-            scissors(out[i + 2 * m], out[i + 3 * m]);
-            scissors(out[i + 4 * m], out[i + 5 * m]);
-            scissors(out[i + 6 * m], out[i + 7 * m]);
+            scissors(out[i + 0*m], out[i + 1*m]);
+            scissors(out[i + 2*m], out[i + 3*m]);
+            scissors(out[i + 4*m], out[i + 5*m]);
+            scissors(out[i + 6*m], out[i + 7*m]);
 
-            out[i + 3 * m] = flip<is_inverse(Direction)>(out[i + 3 * m]);
-            out[i + 5 * m] = multiply_fast(out[i + 5 * m], twiddles[m]);
-            out[i + 7 * m] = multiply_fast(out[i + 7 * m], twiddles[m]);
-            out[i + 7 * m] = flip<is_inverse(Direction)>(out[i + 7 * m]);
+            out[i + 3*m] = flip<Direction>(out[i + 3*m]);
+            out[i + 5*m] = multiply_fast(out[i + 5*m], twiddles[m]);
+            out[i + 7*m] = multiply_fast(out[i + 7*m], twiddles[m]);
+            out[i + 7*m] = flip<Direction>(out[i + 7*m]);
 
-            scissors(out[i + 0 * m], out[i + 2 * m]);
-            scissors(out[i + 1 * m], out[i + 3 * m]);
-            scissors(out[i + 4 * m], out[i + 6 * m]);
-            scissors(out[i + 5 * m], out[i + 7 * m]);
+            scissors(out[i + 0*m], out[i + 2*m]);
+            scissors(out[i + 1*m], out[i + 3*m]);
+            scissors(out[i + 4*m], out[i + 6*m]);
+            scissors(out[i + 5*m], out[i + 7*m]);
 
-            out[i + 6 * m] = flip<is_inverse(Direction)>(out[i + 6 * m]);
-            out[i + 7 * m] = flip<is_inverse(Direction)>(out[i + 7 * m]);
+            out[i + 6*m] = flip<Direction>(out[i + 6*m]);
+            out[i + 7*m] = flip<Direction>(out[i + 7*m]);
 
-            scissors(out[i + 0 * m], out[i + 4 * m]);
-            scissors(out[i + 1 * m], out[i + 5 * m]);
-            scissors(out[i + 2 * m], out[i + 6 * m]);
-            scissors(out[i + 3 * m], out[i + 7 * m]);
+            scissors(out[i + 0*m], out[i + 4*m]);
+            scissors(out[i + 1*m], out[i + 5*m]);
+            scissors(out[i + 2*m], out[i + 6*m]);
+            scissors(out[i + 3*m], out[i + 7*m]);
         }
     }
 
-    std::array<cpx_t, N / 2> twiddles;
+    std::array<cpx_t, N/2> twiddles;
 };
 
 } // fft

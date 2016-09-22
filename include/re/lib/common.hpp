@@ -16,7 +16,8 @@
 #pragma once
 
 #include <cstddef>
-#include <complex>
+#include <gsl/gsl_assert>
+#include <gsl/span>
 
 namespace re {
 

@@ -20,6 +20,7 @@
 #include <re/lib/container/subspan.hpp>
 
 #include <re/lib/simd/simd.hpp>
+#include "common.hpp"
 
 namespace re {
 namespace fft {
@@ -226,7 +227,7 @@ private:
             auto x_a = out[i];
             auto x_b = out[i + 1];
             auto x_c = out[i + 2];
-            auto x_d = flip<false>(out[i + 3]);
+            auto x_d = flip<direction::forward>(out[i + 3]);
 
             out[i] = x_a + x_c;
             out[i + 1] = x_b + x_d;
@@ -241,14 +242,6 @@ private:
             out[i + 1] = out[i] - t;
             out[i] += t;
         }
-    }
-
-    template <bool IsInverse>
-    static constexpr cpx_t flip(cpx_t const value)
-    noexcept {
-        return IsInverse
-               ? cpx_t{ -value.imag(), value.real() }
-               : cpx_t{ value.imag(), -value.real() };
     }
 
     std::array<cpx_t, N/2> twiddles;
