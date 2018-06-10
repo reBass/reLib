@@ -52,6 +52,13 @@ inline multiply_fast(std::complex<T> a, std::complex<T> b) noexcept
     };
 }
 
+template <bool IsInverse, typename T>
+constexpr std::complex<T> flip(std::complex<T> const value)
+noexcept {
+    return IsInverse
+           ? std::complex<T>{ -value.imag(), value.real() }
+           : std::complex<T>{ value.imag(), -value.real() };
+}
 
 template <direction Direction, typename T>
 constexpr std::complex<T> flip(std::complex<T> value)
