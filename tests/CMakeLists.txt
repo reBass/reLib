@@ -6,11 +6,6 @@ if(NOT TARGET gtest)
 
     target_sources(gtest PUBLIC
             ${CMAKE_CURRENT_LIST_DIR}/external/googletest/googletest/include)
-    target_compile_options(gtest PUBLIC "-Wno-undef")
-    target_compile_options(gtest PUBLIC "-Wno-deprecated")
-    target_compile_options(gtest PUBLIC "-Wno-missing-noreturn")
-    target_compile_options(gtest PUBLIC "-Wno-shift-sign-overflow")
-    target_compile_options(gtest PUBLIC "-Wno-used-but-marked-unused")
 endif()
 if(NOT TARGET benchmark)
     set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "enable benchmark tests")
