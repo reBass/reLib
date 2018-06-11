@@ -28,8 +28,8 @@
 
 #include <re/lib/container/revolver.hpp>
 #include <re/lib/math/reductions.hpp>
-#include <re/lib/fft/simd_fft.hpp>
 #include <re/lib/fft/fft.hpp>
+#include <re/lib/fft/simd_fft.hpp>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wpadded"
@@ -40,7 +40,7 @@ using namespace re;
 using namespace re::math;
 
 static float sin_n(int_t i, int_t n) {
-    return std::sinf(static_cast<float>(M_2_PI) * i / n);
+    return std::sin(static_cast<float>(M_2_PI) * i / n);
 }
 
 template <int_t N>
