@@ -102,12 +102,12 @@ public:
     }
 
     void swap(revolver& rhs)
-    noexcept (c.swap(rhs.c)) {
+    noexcept(std::is_nothrow_swappable<C>::value) {
         c.swap(rhs.c);
     }
 
     void swap(C& rhs)
-    noexcept (c.swap(rhs)) {
+    noexcept(std::is_nothrow_swappable<C>::value) {
         c.swap(rhs);
     }
 
