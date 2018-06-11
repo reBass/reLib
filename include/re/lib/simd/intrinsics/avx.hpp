@@ -213,10 +213,10 @@ mul<std::complex<float>>::operator()(
 )
 {
     auto ac_bd = _mm256_mul_ps(a, b);
-    b = __builtin_shufflevector(b.v, b.v, 1, 0, 3, 2, 5, 4, 7, 6);
+    b = RE_SHUFFLE(8, b.v, b.v, 1, 0, 3, 2, 5, 4, 7, 6);
     auto ad_bc = _mm256_mul_ps(a, b);
-    a.v = __builtin_shufflevector(ac_bd, ad_bc, 0, 8, 2, 10, 4, 12, 6, 14);
-    b.v = __builtin_shufflevector(ac_bd, ad_bc, 1, 9, 3, 11, 5, 13, 7, 15);
+    a.v = RE_SHUFFLE(8, ac_bd, ad_bc, 0, 8, 2, 10, 4, 12, 6, 14);
+    b.v = RE_SHUFFLE(8, ac_bd, ad_bc, 1, 9, 3, 11, 5, 13, 7, 15);
 
     return _mm256_addsub_ps(a, b);
 }

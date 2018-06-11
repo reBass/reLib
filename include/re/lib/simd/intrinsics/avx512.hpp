@@ -96,19 +96,19 @@ sqrt<double>::operator()(lane<double> a) {
 template <>
 lane<float>
 hadd<float>::operator()(lane<float> a, lane<float> b) {
-    auto even = __builtin_shufflevector(
-        a.v, b.v, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30
+    auto even = RE_SHUFFLE(
+        16, a.v, b.v, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30
     );
-    auto odd = __builtin_shufflevector(
-        a.v, b.v, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31
+    auto odd = RE_SHUFFLE(
+        16, a.v, b.v, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31
     );
     return _mm512_add_ps(even, odd);
 }
 template <>
 lane<double>
 hadd<double>::operator()(lane<double> a, lane<double> b) {
-    auto even = __builtin_shufflevector(a.v, b.v, 0, 2, 4, 6, 8, 10, 12, 14);
-    auto odd = __builtin_shufflevector(a.v, b.v, 1, 3, 5, 7, 9, 11, 13, 15);
+    auto even = RE_SHUFFLE(8, a.v, b.v, 0, 2, 4, 6, 8, 10, 12, 14);
+    auto odd = RE_SHUFFLE(8, a.v, b.v, 1, 3, 5, 7, 9, 11, 13, 15);
     return _mm512_add_pd(even, odd);
 }
 
