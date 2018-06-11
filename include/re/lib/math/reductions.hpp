@@ -32,7 +32,7 @@ using namespace simd;
 template <typename T, int_t N, typename BinaryOp>
 T reduce(gsl::span<T const, N> in, lane<T> result, BinaryOp op) {
     auto it = std::cbegin(in);
-    for (auto i = 0u; i < (std::size(in) % width<T>); ++i) {
+    for (auto i = 0u; i < (in.size() % width<T>); ++i) {
         result.a[i] = op(result.a[i], *it);
     }
     for (; it < std::cend(in); it += width<T>) {
@@ -45,7 +45,7 @@ template <typename T, int_t N>
 std::pair<T, int_t> max(gsl::span<T const, N> in) {
     auto it = std::cbegin(in);
     auto max = intrinsics::fill<T>()(std::numeric_limits<T>::lowest());
-    for (auto i = 0u; i < (std::size(in) % width<T>); ++i) {
+    for (auto i = 0u; i < (in.size() % width<T>); ++i) {
         max.a[i] = intrinsics::max<T>()(max.a[i], *(it++));
     }
     for (auto const end = std::cend(in); it < end; it += width<T>) {
@@ -63,7 +63,7 @@ T sum(gsl::span<T const, N> in) {
 
 template <typename T, int_t N>
 T mean(gsl::span<T const, N> in) {
-    return sum(in) / std::size(in);
+    return sum(in) / in.size();
 }
 
 template <typename T, int_t N>

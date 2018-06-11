@@ -51,7 +51,7 @@ public:
     simd_fft()
     noexcept {
         auto const step = (false ? 2 : -2) * pi<real_t> / N;
-        for (auto i = 0u; i < std::size(twiddles); ++i) {
+        for (auto i = 0u; i < twiddles.size(); ++i) {
             twiddles[i] = std::polar(real_t{1}, i * step);
         }
     }
