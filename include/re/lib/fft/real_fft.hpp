@@ -77,7 +77,7 @@ private:
         );
         auto out_span = subspan<0, N/2>(out);
 
-        fft(cpx_in, out_span);
+        fft_(cpx_in, out_span);
         real_to_cpx(out);
     }
 
@@ -93,7 +93,7 @@ private:
             reinterpret_cast<cpx_t*>(std::data(out)),
             N/2
         );
-        fft(const_in, cpx_out);
+        fft_(const_in, cpx_out);
     }
 
     void
@@ -128,7 +128,7 @@ private:
         }
     }
 
-    fft<real_t, N/2, Direction> fft;
+    fft<real_t, N/2, Direction> fft_;
     std::array<cpx_t, N/2> twiddles;
 };
 
